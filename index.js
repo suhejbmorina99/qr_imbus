@@ -3,8 +3,16 @@ const QRCode = require("qrcode");
 const admin = require("firebase-admin");
 const cors = require("cors");
 
+let serviceAccount;
+
 // Firebase setup
-const serviceAccount = require("./serviceAccountKey.json");
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  // Running on Render (use env var)
+  serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+} else {
+  // Running locally (use file)
+  serviceAccount = require("./serviceAccountKey.json");
+}
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
