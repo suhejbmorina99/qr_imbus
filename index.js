@@ -7,9 +7,11 @@ let serviceAccount;
 
 // Firebase setup
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+      console.log("✅ Using Firebase credentials from ENV");
   // Running on Render (use env var)
   serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 } else {
+    console.log("⚠️ Using local serviceAccountKey.json");
   // Running locally (use file)
   serviceAccount = require("./serviceAccountKey.json");
 }
