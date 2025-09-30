@@ -32,7 +32,7 @@ app.post("/qr", async (req, res) => {
             createdAt: new Date(), updatedAt: new Date()
         });
 
-        const qrUrl = `https://qrimbus-production.up.railway.app/r/${id}`;
+        const qrUrl = `https://qr-imbus-cf24.onrender.com/r/${id}`;
         const qrImage = await QRCode.toDataURL(qrUrl);
 
         res.json({ id, qrUrl, qrImage });
