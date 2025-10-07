@@ -54,7 +54,7 @@ app.post("/qr", async (req, res) => {
 // -----------------------------
 app.post("/qr/contact", async (req, res) => {
     try {
-        const { title, contact } = req.body;
+        const contact = req.body;
 
         if (!contact || !contact.name || !contact.phone) {
             return res.status(400).json({ error: "Missing required contact fields" });
