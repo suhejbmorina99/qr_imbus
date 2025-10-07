@@ -53,40 +53,51 @@ app.post("/qr", async (req, res) => {
 // Create Contact QR (NEW)
 // -----------------------------
 app.post("/qr/contact", async (req, res) => {
-    try {
-        const contact = req.body;
+  try {
+    const { title, contact } = req.body;
 
-        if (!contact || !contact.name || !contact.phone) {
-            return res.status(400).json({ error: "Missing required contact fields" });
-        }
-
-        const id = Date.now().toString(36);
-
-        const vcard = `BEGIN:VCARD
-                        VERSION:3.0
-                        N:${contact.name}
-                        TEL:${contact.phone}
-                        ${contact.email ? `EMAIL:${contact.email}` : ""}
-                        ${contact.homepage ? `URL:${contact.homepage}` : ""}
-                        ${contact.address ? `ADR:${contact.address}` : ""}
-                        END:VCARD`;
-
-        const qrImage = await QRCode.toDataURL(vcard);
-
-        await db.collection("qr_codes").doc(id).set({
-            id,
-            title,
-            type: "contact",
-            contact,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-
-        res.json({ id, qrImage });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
+    if (!contact || !contact.name || !contact.phone) {
+      return res.status(400).json({ error: "Missing required contact fields" });
     }
+
+    // fallback if title not provided
+    const qrTitle = title || contact.name || "New Contact";
+
+    const id = Date.now().toString(36);
+
+    // Generate vCard content with proper line breaks
+    const vcard = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      `N:${contact.name}`,
+      `TEL:${contact.phone}`,
+      contact.email ? `EMAIL:${contact.email}` : "",
+      contact.homepage ? `URL:${contact.homepage}` : "",
+      contact.address ? `ADR:${contact.address}` : "",
+      "END:VCARD"
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    // Generate QR image
+    const qrImage = await QRCode.toDataURL(vcard);
+
+    // Save in Firestore
+    await db.collection("qr_codes").doc(id).set({
+      id,
+      title: qrTitle,
+      type: "contact",
+      contact,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    // Respond with generated image
+    res.json({ id, qrImage });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // -----------------------------
